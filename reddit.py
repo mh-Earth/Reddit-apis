@@ -1,19 +1,19 @@
 import os
 import praw
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from datetime import datetime
 import pathlib
 import json
-load_dotenv()
+# load_dotenv()
 class Reddit():
     
     JSON_PATH = "Selected.json"
     POST_KEY = "submission"
     def __init__(self) -> None:
         self.reddit = praw.Reddit(
-                client_id=os.getenv('client_id'),
-                client_secret=os.getenv('client_secret'),
-                user_agent=os.getenv('user_agent'),
+                client_id="_-al8UcecqA9UAg_u_wBrg",
+                client_secret="Yv2-OLLm4Xv9ssQ4ZSEet7DVBjkKGA",
+                user_agent="<Auto memer>",
         )
         
         self.data_path = os.path.join(pathlib.Path(__file__).parent.resolve())
