@@ -4,6 +4,8 @@ import praw
 from datetime import datetime
 import pathlib
 import json
+from prawcore.exceptions import NotFound
+
 # load_dotenv()
 class Reddit():
     
@@ -23,13 +25,14 @@ class Reddit():
             "mode":mode,
             "time":datetime.utcnow()
         }
+
         subreddit = self.reddit.subreddit(subReddit)
 
         if mode == 'day':
             submissions = subreddit.top("day", limit=limit)
             for submission in submissions:
                 url:str = submission.url.lower()
-                if not submission.stickied and ".jpg" in url or ".png" in url and submission.id not in self.selected_sumissions:
+                if not submission.stickied and ".jpg" in url or ".png" in url:
 
                     posts["submission"].update({submission.id:{
                         "id":submission.id,
@@ -48,7 +51,7 @@ class Reddit():
         elif mode == "hot":
             for submission in subreddit.hot(limit=limit):
                 url:str = submission.url.lower()
-                if not submission.stickied and ".jpg" in url or ".png" in url and submission.id not in self.selected_sumissions:
+                if not submission.stickied and ".jpg" in url or ".png" in url:
                     
                     posts["submission"].update({submission.id:{
                         "id":submission.id,
@@ -67,7 +70,7 @@ class Reddit():
         elif mode == "new":
             for submission in subreddit.new(limit=limit):
                 url:str = submission.url.lower()
-                if not submission.stickied and ".jpg" in url or ".png" in url and submission.id not in self.selected_sumissions:
+                if not submission.stickied and ".jpg" in url or ".png" in url:
                     
                     posts["submission"].update({submission.id:{
                         "id":submission.id,
@@ -85,8 +88,17 @@ class Reddit():
         
         else:
             return None
+    
+    
+    def check(self,subreddit:str):
+        try:
+            self.reddit.redditor(subreddit).id
+        except Exception as e:
+            return False
+        return True
 
 
 if __name__ == "__main__":
 
     a = Reddit()
+    print(a.check("memes"))

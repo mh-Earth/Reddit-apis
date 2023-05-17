@@ -38,18 +38,26 @@ class AdminUser(db.Model):
 # http://localhost:3000/get/meme/hot
 @app.route("/get/<string:sub_reddit>/<string:mode>/<int:limit>")
 def getallsubs(sub_reddit,mode,limit):
-    subs = reddit_api.submission_from_subreddit(subReddit=sub_reddit,mode=mode,limit=limit)
-    previous_subs = Submission.query.all()
 
-    for sub in previous_subs:
-        if sub.submission_id in subs['submission']:
-            subs['submission'].pop(sub.submission_id)
-            pass
+    if reddit_api.check(sub_reddit):
+        valid_mode = ["new","hot","day"]
 
-    subs['submission'] = sorted(subs['submission'].items() ,key=lambda x:x[0][1])
-    subs.update({"total":len(subs['submission'])})
-    return jsonify(subs)
+        if mode not in valid_mode:
+            return f"Invalid mode '{mode}'" ,404
+         
+        subs = reddit_api.submission_from_subreddit(subReddit=sub_reddit,mode=mode,limit=limit)
+        previous_subs = Submission.query.all()
 
+        for sub in previous_subs:
+            if sub.submission_id in subs['submission']:
+                subs['submission'].pop(sub.submission_id)
+
+        subs['submission'] = sorted(subs['submission'].items() ,key=lambda x:x[0][1])
+        subs.update({"total":len(subs['submission'])})
+        return jsonify(subs)
+
+    else:
+        return f"'{sub_reddit}' not found" ,404
 
 # http://localhost:3000/save
 @app.route("/save" , methods=['POST'])
@@ -108,4 +116,4 @@ def deletes():
 
 
 if __name__ == "__main__":
-    app.run(debug=True,port=3000)
+    app.run(debug=True,port=8080)
