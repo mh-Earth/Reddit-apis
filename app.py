@@ -43,7 +43,7 @@ def getallsubs(sub_reddit,mode,limit):
         valid_mode = ["new","hot","day","rising"]
 
         if mode not in valid_mode:
-            return f"Invalid mode '{mode}'" ,404
+            return f"Invalid mode '{mode}'" ,404 ,{"Access-Control-Allow-Origin": "*"}
          
         subs = reddit_api.submission_from_subreddit(subReddit=sub_reddit,mode=mode,limit=limit)
         previous_subs = Submission.query.all()
@@ -58,7 +58,7 @@ def getallsubs(sub_reddit,mode,limit):
         return res
 
     else:
-        return f"'{sub_reddit}' not found" ,404
+        return f"'{sub_reddit}' not found" ,404 ,{"Access-Control-Allow-Origin": "*"}
 
 # http://localhost:3000/save
 @app.route("/save" , methods=['POST'])
@@ -74,16 +74,20 @@ def Save():
         data = {
             "error":"No submission data found"
         }
-        return jsonify(data)
+        res = jsonify(data)
+        res.headers.add('Access-Control-Allow-Origin', '*')
+        return res , 200
     
     # print(all_submissions)
-    return "Saved", 200
+    res = jsonify("status:ok")
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res , 200
 
 # http://localhost:3000/show
 @app.route("/show")
 def show_all():
     all_submissions = Submission.query.all()
-    return jsonify(all_submissions)
+    return jsonify(all_submissions) , 200 ,{"Access-Control-Allow-Origin": "*"}
 
 @app.route("/remove/<string:submission_id>" , methods=['DELETE'])
 def delete(submission_id):
@@ -92,7 +96,7 @@ def delete(submission_id):
     db.session.delete(submission)
     db.session.commit()
 
-    return "" , 204
+    return "" , 204  ,{"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/removes", methods=['DELETE'])
@@ -112,7 +116,7 @@ def deletes():
         return jsonify(data)
     
     # print(all_submissions)
-    return "Saved", 200
+    return "Saved", 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/check/<string:subreddit>", methods=['GET'])
