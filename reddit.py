@@ -20,7 +20,7 @@ class Reddit():
     def submission_from_subreddit(self,subReddit:str,mode:str,limit:int) -> dict :
 
         posts:dict = {
-            "submission":{},
+            "submission":[],
             "sub_reddit":subReddit,
             "mode":mode,
             "time":datetime.utcnow()
@@ -34,16 +34,16 @@ class Reddit():
                 url:str = submission.url.lower()
                 if not submission.stickied and ".jpg" in url or ".png" in url:
 
-                    posts["submission"].update({submission.id:{
+                    posts["submission"].append({
                         "id":submission.id,
-                        "author":submission.author.name,
-                        "created_at":submission.created_utc,
                         "title":submission.title,
+                        "author":submission.author.name,
                         "score":submission.score,
-                        "url":submission.url,
-                        "upvote_ratio":submission.upvote_ratio
+                        "created_at":submission.created_utc,
+                        "upvote_ratio":submission.upvote_ratio,
+                        "url":submission.url
 
-                    }})
+                    })
 
 
             return posts
@@ -53,17 +53,16 @@ class Reddit():
                 url:str = submission.url.lower()
                 if not submission.stickied and ".jpg" in url or ".png" in url:
                     
-                    posts["submission"].update({submission.id:{
+                    posts["submission"].append({
                         "id":submission.id,
-                        "author":submission.author.name,
-                        "created_at":submission.created_utc,
                         "title":submission.title,
+                        "author":submission.author.name,
                         "score":submission.score,
-                        "url":submission.url,
-                        "upvote_ratio":submission.upvote_ratio
+                        "created_at":submission.created_utc,
+                        "upvote_ratio":submission.upvote_ratio,
+                        "url":submission.url
 
-
-                    }})
+                    })
 
             return posts
 
@@ -72,17 +71,34 @@ class Reddit():
                 url:str = submission.url.lower()
                 if not submission.stickied and ".jpg" in url or ".png" in url:
                     
-                    posts["submission"].update({submission.id:{
+                    posts["submission"].append({
                         "id":submission.id,
-                        "author":submission.author.name,
-                        "created_at":submission.created_utc,
                         "title":submission.title,
+                        "author":submission.author.name,
                         "score":submission.score,
-                        "url":submission.url,
-                        "upvote_ratio":submission.upvote_ratio
+                        "created_at":submission.created_utc,
+                        "upvote_ratio":submission.upvote_ratio,
+                        "url":submission.url
 
+                    })
 
-                    }})
+            return posts
+
+        elif mode == "rising":
+            for submission in subreddit.rising():
+                url:str = submission.url.lower()
+                if not submission.stickied and ".jpg" in url or ".png" in url:
+                    
+                    posts["submission"].append({
+                        "id":submission.id,
+                        "title":submission.title,
+                        "author":submission.author.name,
+                        "score":submission.score,
+                        "created_at":submission.created_utc,
+                        "upvote_ratio":submission.upvote_ratio,
+                        "url":submission.url
+
+                    })
 
             return posts
         
@@ -94,11 +110,27 @@ class Reddit():
         try:
             self.reddit.redditor(subreddit).id
         except Exception as e:
-            return False
+            try:
+                self.reddit.subreddit(subreddit).id
+                return True
+            except Exception as e:
+                return False
         return True
+
+    def test(self,subreddit):
+        try:
+            self.reddit.redditor(subreddit).id
+        except Exception as e:
+            try:
+                self.reddit.subreddit(subreddit).id
+                return True
+            except Exception as e:
+                return False
+        return True
+
 
 
 if __name__ == "__main__":
 
     a = Reddit()
-    print(a.check("memes"))
+    print(a.test("memes"))

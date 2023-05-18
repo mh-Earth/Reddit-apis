@@ -40,7 +40,7 @@ class AdminUser(db.Model):
 def getallsubs(sub_reddit,mode,limit):
 
     if reddit_api.check(sub_reddit):
-        valid_mode = ["new","hot","day"]
+        valid_mode = ["new","hot","day","rising"]
 
         if mode not in valid_mode:
             return f"Invalid mode '{mode}'" ,404
@@ -52,9 +52,10 @@ def getallsubs(sub_reddit,mode,limit):
             if sub.submission_id in subs['submission']:
                 subs['submission'].pop(sub.submission_id)
 
-        subs['submission'] = sorted(subs['submission'].items() ,key=lambda x:x[0][1])
         subs.update({"total":len(subs['submission'])})
-        return jsonify(subs)
+        res = jsonify(subs)
+        res.headers.add('Access-Control-Allow-Origin', '*')
+        return res
 
     else:
         return f"'{sub_reddit}' not found" ,404
@@ -112,6 +113,81 @@ def deletes():
     
     # print(all_submissions)
     return "Saved", 200
+
+
+@app.route("/check/<string:subreddit>", methods=['GET'])
+def checkSubreddit(subreddit):
+    is_exits =  reddit_api.check(subreddit)
+
+    if is_exits:
+        return "" , 200, {"Access-Control-Allow-Origin": "*"}
+    
+    return "" , 404 ,{"Access-Control-Allow-Origin": "*"}
+
+
+
+
+
+@app.route("/test", methods=['GET'])
+def test():
+    data = {
+  "mode": "day",
+  "sub_reddit": "memes",
+  "submission": [
+    {
+      "author": "so-unobvious",
+      "created_at": 1684357508.0,
+      "id": "13ke2ey",
+      "score": 23165,
+      "title": "Who do I call to complain",
+      "upvote_ratio": 0.85,
+      "url": "https://i.redd.it/k6wmemz3ig0b1.jpg"
+    },
+    {
+      "author": "finndestroyer2",
+      "created_at": 1684340000.0,
+      "id": "13k68p5",
+      "score": 17217,
+      "title": "How are y'all not getting stung",
+      "upvote_ratio": 0.9,
+      "url": "https://i.redd.it/futo8f5ljg0b1.jpg"
+    },
+    {
+      "author": "xocoping",
+      "created_at": 1684315340.0,
+      "id": "13jwmo1",
+      "score": 16682,
+      "title": "confused stonks",
+      "upvote_ratio": 0.97,
+      "url": "https://i.redd.it/zn30kmw8ie0b1.png"
+    },
+    {
+      "author": "RansWachers",
+      "created_at": 1684324347.0,
+      "id": "13jziyo",
+      "score": 15101,
+      "title": "what is even the point of paying extra for luggage weight",
+      "upvote_ratio": 0.92,
+      "url": "https://i.redd.it/5zdz53sird0b1.jpg"
+    },
+    {
+      "author": "Crankytyuz",
+      "created_at": 1684325677.0,
+      "id": "13k00o5",
+      "score": 14309,
+      "title": "“you ready guys”",
+      "upvote_ratio": 0.96,
+      "url": "https://i.redd.it/ynoj1frzcf0b1.jpg"
+    }
+  ],
+  "time": "Thu, 18 May 2023 05:42:30 GMT",
+  "total": 5
+}
+    res = jsonify(data)
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
+
+    
 
 
 
