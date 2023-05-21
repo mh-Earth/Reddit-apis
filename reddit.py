@@ -118,15 +118,8 @@ class Reddit():
         return True
 
     def test(self,subreddit):
-        try:
-            self.reddit.redditor(subreddit).id
-        except Exception as e:
-            try:
-                self.reddit.subreddit(subreddit).id
-                return True
-            except Exception as e:
-                return False
-        return True
+        a = self.reddit.submission("13ngrwk")
+        print(a.url)
 
 
 
