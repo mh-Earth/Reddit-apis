@@ -35,6 +35,16 @@ class AdminUser(db.Model):
     user = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, unique=True, nullable=False)
     
+@dataclass
+class Settings(db.Model):
+    id:int
+    limit:int
+    mode:int
+
+    id = db.Column(db.Integer, primary_key=True)
+    mode = db.Column(db.Integer, unique=True, nullable=False)
+    limit = db.Column(db.Integer, unique=True, nullable=False)
+    
 
 # Decorator to add CORS headers to each response
 def add_cors_headers(func):
@@ -157,9 +167,31 @@ def checkSubreddit(subreddit):
 
 #     return "DELETED" ,200
 
+@app.route("/settings", methods=['POST','GET'])
+def handel_settings():
+    if request.method == 'POST':
+        if request.is_json:
+            new_data = request.get_json()
+            settings_data = Settings.query.filter_by(id=1).first()
+            settings_data.limit = new_data["limit"]
+            settings_data.mode = new_data["mode"]
+            db.session.commit()
+            return "" ,200
 
+    elif request.method == 'GET':
 
+        if len(Settings.query.all()) == 0:
 
+            initial_settings = Settings(limit=50,mode="day")
+            db.session.add(initial_settings)
+            db.session.commit()
+            return jsonify(initial_settings) , 200
+
+        
+        settings = Settings.query.filter_by(id=1).first()
+        return jsonify(settings) , 200
+
+    
 # @app.route("/test", methods=['GET'])
 # def test():
 #     subs = {
