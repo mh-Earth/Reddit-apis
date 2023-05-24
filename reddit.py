@@ -5,6 +5,7 @@ from datetime import datetime
 import pathlib
 import json
 from prawcore.exceptions import NotFound
+import time
 
 # load_dotenv()
 class Reddit():
@@ -35,6 +36,7 @@ class Reddit():
                 if not submission.stickied and ".jpg" in url or ".png" in url:
 
                     posts["submission"].append({
+                        "name":submission.name,
                         "id":submission.id,
                         "title":submission.title,
                         "author":submission.author.name,
@@ -54,6 +56,7 @@ class Reddit():
                 if not submission.stickied and ".jpg" in url or ".png" in url:
                     
                     posts["submission"].append({
+                        "name":submission.name,
                         "id":submission.id,
                         "title":submission.title,
                         "author":submission.author.name,
@@ -72,6 +75,7 @@ class Reddit():
                 if not submission.stickied and ".jpg" in url or ".png" in url:
                     
                     posts["submission"].append({
+                        "name":submission.name,
                         "id":submission.id,
                         "title":submission.title,
                         "author":submission.author.name,
@@ -90,6 +94,7 @@ class Reddit():
                 if not submission.stickied and ".jpg" in url or ".png" in url:
                     
                     posts["submission"].append({
+                        "name":submission.name,
                         "id":submission.id,
                         "title":submission.title,
                         "author":submission.author.name,
@@ -108,22 +113,52 @@ class Reddit():
     
     def check(self,subreddit:str):
         try:
-            self.reddit.redditor(subreddit).id
+            self.reddit.subreddit(subreddit).id
         except Exception as e:
-            try:
-                self.reddit.subreddit(subreddit).id
-                return True
-            except Exception as e:
-                return False
+            return False
+        
         return True
+    
+    def measure_execution_time(func):
+        def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            execution_time = end_time - start_time
+            print(f"Execution time of {func.__name__}: {execution_time} seconds")
+            return result
+        return wrapper
 
-    def test(self,subreddit):
-        a = self.reddit.submission("13ngrwk")
-        print(a.url)
+    @measure_execution_time
+    def nameToDetails(self,submission_names:list) -> dict:
+
+        posts:dict = {
+            "submission":[],
+            "time":datetime.utcnow()
+        }
+
+        submissions_list = list(self.reddit.info(fullnames=submission_names))
+        for submission in submissions_list:
+                posts["submission"].append({
+                    "name":submission.name,
+                    "id":submission.id,
+                    "title":submission.title,
+                    "author":submission.author.name,
+                    "score":submission.score,
+                    "created_at":submission.created_utc,
+                    "upvote_ratio":submission.upvote_ratio,
+                    "url":submission.url
+
+                })
+
+        return posts
+
+
+
+
 
 
 
 if __name__ == "__main__":
 
-    a = Reddit()
-    print(a.test("memes"))
+    pass

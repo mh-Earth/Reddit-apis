@@ -20,10 +20,10 @@ reddit_api = Reddit()
 @dataclass
 class Submission(db.Model):
     id:int
-    submission_id:str
+    submission_name:str
 
     id = db.Column(db.Integer, primary_key=True)
-    submission_id = db.Column(db.String, nullable=False)
+    submission_name = db.Column(db.String, nullable=False)
 
 @dataclass
 class AdminUser(db.Model):
@@ -81,7 +81,7 @@ def getallsubs(sub_reddit,mode,limit):
 
         for sub in previous_subs:
             for index,new_sub in enumerate(subs['submission']):
-                if sub.submission_id == new_sub['id']:
+                if sub.submission_name == new_sub['name']:
                     subs['submission'].pop(index)
         subs.update({"total":len(subs['submission'])})
 
@@ -98,8 +98,8 @@ def save():
 
     if request.is_json:
         jsondata = request.get_json()
-        for subs in jsondata['submission_ids']:
-            new_submission = Submission(submission_id=subs)
+        for subs in jsondata['submission_names']:
+            new_submission = Submission(submission_name=subs)
             db.session.add(new_submission)
             db.session.commit()
 
@@ -114,28 +114,47 @@ def save():
     res = jsonify("ok")
     return res , 200
 
+
+
+
+@app.route("/getall" , methods=['GET'])
+def getall():
+
+    all_submissions = Submission.query.all()
+    submission_names = [item.submission_name for item in all_submissions]
+    submission_names.reverse()
+    print(submission_names)
+    data = reddit_api.nameToDetails(submission_names)
+    data.update({"total":len(data['submission'])})
+
+
+    return jsonify(data) ,200
+
+
+
 # http://localhost:3000/show
 @app.route("/show")
 def show_all():
     all_submissions = Submission.query.all()
     return jsonify(all_submissions) , 200 ,{"Access-Control-Allow-Origin": "*"}
 
-@app.route("/remove/<string:submission_id>" , methods=['DELETE'])
-def delete(submission_id):
+@app.route("/remove/<string:submission_name>" , methods=['DELETE'])
+def delete(submission_name):
     # delete from database
-    submission = Submission.query.filter_by(submission_id=submission_id).first()
+    submission = Submission.query.filter_by(submission_name=submission_name).first()
     db.session.delete(submission)
     db.session.commit()
 
-    return "" , 204  ,{"Access-Control-Allow-Origin": "*"}
+    return "" , 200  ,{"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/removes", methods=['DELETE'])
 def deletes():
     if request.is_json:
         jsondata = request.get_json()
-        for subs in jsondata['submission_ids']:
-            new_submission = Submission(submission_id=subs)
+        print(jsondata)
+        for name in jsondata['submission_names']:
+            new_submission = Submission.query.filter_by(submission_name=name).first()
             db.session.delete(new_submission)
             db.session.commit()
 
@@ -147,7 +166,7 @@ def deletes():
         return jsonify(data)
     
     # print(all_submissions)
-    return "DELETED", 404 ,{"Access-Control-Allow-Origin": "*"}
+    return "DELETED", 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
 @app.route("/check/<string:subreddit>", methods=['GET'])
