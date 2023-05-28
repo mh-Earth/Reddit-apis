@@ -2,10 +2,8 @@ import os
 import praw
 # from dotenv import load_dotenv
 from datetime import datetime
-import pathlib
-import json
-from prawcore.exceptions import NotFound
 import time
+import validators
 
 # load_dotenv()
 class Reddit():
@@ -139,17 +137,26 @@ class Reddit():
 
         submissions_list = list(self.reddit.info(fullnames=submission_names))
         for submission in submissions_list:
-                posts["submission"].append({
-                    "name":submission.name,
-                    "id":submission.id,
-                    "title":submission.title,
-                    "author":submission.author.name,
-                    "score":submission.score,
-                    "created_at":submission.created_utc,
-                    "upvote_ratio":submission.upvote_ratio,
-                    "url":submission.url
+                # if any of the required value dose not exit then skip that submission
+                try:
+                    if validators.url(submission.url):
+                        url = submission.url
+                    else:
+                        raise TypeError
 
-                })
+                    posts["submission"].append({
+                        "name":submission.name, # most required
+                        "id":submission.id, # most required
+                        "title":submission.title, # most required
+                        "author":submission.author.name if submission.author != None else "Not found", #optional
+                        "score":submission.score if submission.score != None else "Not found", #optional
+                        "created_at":submission.created_utc if submission.created_utc != None else "Not found", #optional
+                        "upvote_ratio":submission.upvote_ratio if submission.upvote_ratio != None else "Not found", #optional
+                        "url":url # most required
+
+                    })
+                except Exception as e:
+                    pass
 
         return posts
 

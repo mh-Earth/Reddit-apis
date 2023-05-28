@@ -123,7 +123,6 @@ def getall():
     all_submissions = Submission.query.all()
     submission_names = [item.submission_name for item in all_submissions]
     submission_names.reverse()
-    print(submission_names)
     data = reddit_api.nameToDetails(submission_names)
     data.update({"total":len(data['submission'])})
 
@@ -152,7 +151,6 @@ def delete(submission_name):
 def deletes():
     if request.is_json:
         jsondata = request.get_json()
-        print(jsondata)
         for name in jsondata['submission_names']:
             new_submission = Submission.query.filter_by(submission_name=name).first()
             db.session.delete(new_submission)
@@ -165,7 +163,6 @@ def deletes():
         }
         return jsonify(data)
     
-    # print(all_submissions)
     return "DELETED", 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
@@ -209,119 +206,6 @@ def handel_settings():
         
         settings = Settings.query.filter_by(id=1).first()
         return jsonify(settings) , 200
-
-    
-# @app.route("/test", methods=['GET'])
-# def test():
-#     subs = {
-#   "mode": "new",
-#   "sub_reddit": "memes",
-#   "submission": [
-#     {
-#       "author": "azul_ivy",
-#       "created_at": 1684652156.0,
-#       "id": "13nlkgk",
-#       "score": 6,
-#       "title": "Literally me",
-#       "upvote_ratio": 1.0,
-#       "url": "https://i.redd.it/4is4x5rrb61b1.jpg"
-#     },
-#     {
-#       "author": "Please_ForgetMe",
-#       "created_at": 1684652145.0,
-#       "id": "13nlkbj",
-#       "score": 2,
-#       "title": "Zork be givin me sas",
-#       "upvote_ratio": 1.0,
-#       "url": "https://i.redd.it/2g1zpz0rb61b1.jpg"
-#     },
-#     {
-#       "author": "RealzLlamaz",
-#       "created_at": 1684652100.0,
-#       "id": "13nljtl",
-#       "score": 2,
-#       "title": "[insert rant about how we are living in the matrix and need to wake up here]",
-#       "upvote_ratio": 1.0,
-#       "url": "https://i.redd.it/g8h444gmb61b1.jpg"
-#     },
-#     {
-#       "author": "daviess",
-#       "created_at": 1684651797.0,
-#       "id": "13nlgjp",
-#       "score": 13,
-#       "title": "She really had those thin 90's eyebrows",
-#       "upvote_ratio": 1.0,
-#       "url": "https://i.redd.it/q979791qa61b1.jpg"
-#     },
-#     {
-#       "author": "azul_ivy",
-#       "created_at": 1684651319.0,
-#       "id": "13nlbbo",
-#       "score": 2,
-#       "title": "I don't want Monday to come",
-#       "upvote_ratio": 0.67,
-#       "url": "https://i.redd.it/4mojgz8a961b1.jpg"
-#     },
-#     {
-#       "author": "RSforce1",
-#       "created_at": 1684651134.0,
-#       "id": "13nl9ai",
-#       "score": 6,
-#       "title": "Excuse me, what the f...",
-#       "upvote_ratio": 0.88,
-#       "url": "https://i.redd.it/bgke2cyq861b1.jpg"
-#     },
-#     {
-#       "author": "Total-Experience2787",
-#       "created_at": 1684648987.0,
-#       "id": "13nkm1c",
-#       "score": 14,
-#       "title": "Its because of zeta im tellin you",
-#       "upvote_ratio": 0.95,
-#       "url": "https://i.redd.it/52z301dsk41b1.png"
-#     },
-#     {
-#       "author": "InsanePug",
-#       "created_at": 1684648972.0,
-#       "id": "13nklvp",
-#       "score": 7,
-#       "title": "Scatman, Awesome face song, EEEAAAOOO...",
-#       "upvote_ratio": 0.77,
-#       "url": "https://i.redd.it/63cygldb261b1.jpg"
-#     },
-#     {
-#       "author": "LemonConnoiseur",
-#       "created_at": 1684647802.0,
-#       "id": "13nk8iu",
-#       "score": 5,
-#       "title": "Can’t wait to see it!",
-#       "upvote_ratio": 0.67,
-#       "url": "https://i.redd.it/elny2t5uy51b1.jpg"
-#     }
-#   ],
-#   "time": "Sun, 21 May 2023 07:01:20 GMT",
-#   "total": 9
-# }
-#     previous_subs = Submission.query.all()
-
-#     for sub in previous_subs:
-#         for index,new_sub in enumerate(subs['submission']):
-#             if sub.submission_id == new_sub['id']:
-#                 print("True")
-#                 subs['submission'].pop(index)
-#     subs.update({"total":len(subs['submission'])})
-#         # # print(sub)
-#         # print(subs['submission'][index]['id'])
-#         # print(sub.submission_id)
-#         # if sub.submission_id == subs['submission'][index]['id']:
-
-#     # print(f"Filter subs are {subs['submission']} \n\n" )
-#     res = jsonify(subs)
-#     res.headers.add('Access-Control-Allow-Origin', '*')
-#     return res
-
-    
-
 
 
 if __name__ == "__main__":
