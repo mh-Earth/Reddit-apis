@@ -3,7 +3,6 @@ import praw
 # from dotenv import load_dotenv
 from datetime import datetime
 import time
-import validators
 
 # load_dotenv()
 class Reddit():
@@ -139,7 +138,7 @@ class Reddit():
         for submission in submissions_list:
                 # if any of the required value dose not exit then skip that submission
                 try:
-                    if validators.url(submission.url):
+                    if submission.url != "":
                         url = submission.url
                     else:
                         raise TypeError
