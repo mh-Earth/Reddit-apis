@@ -3,17 +3,17 @@ import praw
 # from dotenv import load_dotenv
 from datetime import datetime
 import time
-
+from settings import *
 # load_dotenv()
 class Reddit():
-    
+
     def __init__(self) -> None:
         self.reddit = praw.Reddit(
-                client_id="_-al8UcecqA9UAg_u_wBrg",
-                client_secret="Yv2-OLLm4Xv9ssQ4ZSEet7DVBjkKGA",
-                user_agent="<Auto memer>",
+            client_id=CLIENT_ID,
+            client_secret=CLIENT_SECRET,
+            user_agent=USER_AGENT
         )
-    
+
     # return every .png , .jpg file submission those who have not beem selected before
     def submission_from_subreddit(self,subReddit:str,mode:str,limit:int) -> dict :
 
@@ -51,7 +51,7 @@ class Reddit():
             for submission in subreddit.hot(limit=limit):
                 url:str = submission.url.lower()
                 if not submission.stickied and ".jpg" in url or ".png" in url:
-                    
+
                     posts["submission"].append({
                         "name":submission.name,
                         "id":submission.id,
@@ -70,7 +70,7 @@ class Reddit():
             for submission in subreddit.new(limit=limit):
                 url:str = submission.url.lower()
                 if not submission.stickied and ".jpg" in url or ".png" in url:
-                    
+
                     posts["submission"].append({
                         "name":submission.name,
                         "id":submission.id,
@@ -89,7 +89,7 @@ class Reddit():
             for submission in subreddit.rising():
                 url:str = submission.url.lower()
                 if not submission.stickied and ".jpg" in url or ".png" in url:
-                    
+
                     posts["submission"].append({
                         "name":submission.name,
                         "id":submission.id,
@@ -103,26 +103,26 @@ class Reddit():
                     })
 
             return posts
-        
+
         else:
             return None
-    
-    
+
+
     def check(self,subreddit:str):
         try:
             self.reddit.subreddit(subreddit).id
         except Exception as e:
             return False
-        
+
         return True
-    
+
     def measure_execution_time(func):
         def wrapper(*args, **kwargs):
             start_time = time.perf_counter()
             result = func(*args, **kwargs)
             end_time = time.perf_counter()
             execution_time = end_time - start_time
-            print(f"Execution time of {func.__name__}: {execution_time} seconds")
+            # print(f"Execution time of {func.__name__}: {execution_time} seconds")
             return result
         return wrapper
 
@@ -160,11 +160,3 @@ class Reddit():
         return posts
 
 
-
-
-
-
-
-if __name__ == "__main__":
-
-    pass
