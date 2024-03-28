@@ -8,7 +8,7 @@ from settings import *
 class Reddit():
 
     def __init__(self) -> None:
-        self.reddit = praw.Reddit(
+        self.reddit = praw.Reddit( #vritual env dosen't work on production so remember it to replace variable from setting to their actual value everywhere.
             client_id=CLIENT_ID,
             client_secret=CLIENT_SECRET,
             user_agent=USER_AGENT

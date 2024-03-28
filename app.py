@@ -34,12 +34,10 @@ class Posted(db.Model):
     submission_name = db.Column(db.String, nullable=False)
 
 @dataclass
-class AdminUser(db.Model):
+class Admin(db.Model):
     id:int
     username:str
     password:str
-    # first_name:str
-    # last_name:str
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True, nullable=False)
@@ -49,11 +47,13 @@ class AdminUser(db.Model):
 class Settings(db.Model):
     id:int
     limit:int
-    mode:int
+    mode:str
+    is_reversed:bool
 
     id = db.Column(db.Integer, primary_key=True)
     mode = db.Column(db.Integer, unique=True, nullable=False)
     limit = db.Column(db.Integer, unique=True, nullable=False)
+    is_reversed = db.Column(db.Boolean, nullable=False)
 
 
 # Decorator to add CORS headers to each response
@@ -111,6 +111,47 @@ def add_cors_headers_to_response(response):
     return response
 
 
+
+@app.route("/admin",methods=['POST','GET','DELETE'])
+@require_api_key
+def admin():
+    if request.method == "GET":
+        admin = Admin.query.filter_by(id=1).first()
+        return jsonify(admin) , 200
+        ...
+
+    elif request.method == "POST":
+        if request.is_json:
+            if len(Admin.query.all()) == 0:
+                # {username:"", password:""}
+                try:
+                    jsondata = request.get_json()
+                    username = jsondata['username']
+                    password = jsondata['password']
+                    new_admin = Admin(username=username,password=password)
+                    db.session.add(new_admin)
+                    db.session.commit()
+                    return jsonify(new_admin) , 200
+                except KeyError:
+                    return 'key word error' , 200
+
+
+    elif request.method == "DELETE":
+        if request.is_json:
+            jsondata = request.get_json()
+            password = jsondata['password']
+            admin_pass = Admin.query.filter_by(id=1).first().password
+            if password == admin_pass:
+                db.session.query(Admin).delete()
+                db.session.commit()
+                return "DELETED" ,200
+            else:
+                return "Unauthorized", 401
+        else:
+            return "Not found" ,404
+        
+    
+
 # http://localhost:3000/get/meme/hot
 @app.route("/get/<string:sub_reddit>/<string:mode>/<int:limit>")
 @require_api_key
@@ -160,17 +201,16 @@ def save():
         res = jsonify(data)
         return res , 404
 
-
-
-
-
 @app.route("/getall" , methods=['GET'])
 @require_api_key
 def getall():
 
     all_submissions = Submission.query.all()
     submission_names = [item.submission_name for item in all_submissions]
-    submission_names.reverse()
+    settings  = Settings.query.filter_by(id=1).first()
+    if settings.is_reversed:
+        submission_names.reverse()
+
     data = reddit_api.nameToDetails(submission_names)
     data.update({"total":len(data['submission'])})
     return jsonify(data) ,200
@@ -236,18 +276,22 @@ def delete(submission_name):
 
     return "" , 200  ,{"Access-Control-Allow-Origin": "*"}
 
-
+# DELETE ONE OR MANY SUBMISSIONS
 @app.route("/removes", methods=['DELETE'])
 @require_api_key
 def deletes():
     if request.is_json:
         jsondata = request.get_json()
-        for name in jsondata['submission_names']:
-            submission = Submission.query.filter(Submission.submission_name.endswith(name)).first()
-            if submission:
-                db.session.delete(submission)
-                db.session.commit()
+        admin_pass = Admin.query.filter_by(id=1).first().password
 
+        if jsondata['password'] == admin_pass:
+            for name in jsondata['submission_names']:
+                submission = Submission.query.filter(Submission.submission_name.endswith(name)).first()
+                if submission:
+                    db.session.delete(submission)
+                    db.session.commit()
+        else:
+            return "Unauthorized", 401 
 
     else:
         data = {
@@ -258,24 +302,51 @@ def deletes():
     return "DELETED", 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
-@app.route("/check/<string:subreddit>", methods=['GET'])
+@app.route("/check/<string:subreddit>", methods=['GET','POST'])
 @require_api_key
 def checkSubreddit(subreddit):
-    is_exits =  reddit_api.check(subreddit)
+    if request.method == 'GET':
 
-    if is_exits:
-        return "" , 200, {"Access-Control-Allow-Origin": "*"}
+        is_exits =  reddit_api.check(subreddit)
 
-    return "" , 404 ,{"Access-Control-Allow-Origin": "*"}
+        if is_exits:
+            return "" , 200, {"Access-Control-Allow-Origin": "*"}
 
+        return "" , 404 ,{"Access-Control-Allow-Origin": "*"}
+    elif request.method == 'POST':
+        if request.is_json:
+            jsondata = request.get_json()
+            password = jsondata['password']
+            admin_pass = Admin.query.filter_by(id=1).first().password
+            if password == admin_pass:
+                return "Vari" ,200
+            else:
+                return "Unauthorized", 401
+        else:
+            return "Not found" ,404
+
+# delete all submissions
 @app.route("/reset", methods=['DELETE'])
 @require_api_key
 def delete_all():
-    # Delete all entries in the model
-    db.session.query(Submission).delete()
-    db.session.commit()
+    if request.is_json:
+        jsondata = request.get_json()
+        password = jsondata['password']
+        admin = Admin.query.filter_by(id=1).first()
+        if admin:
+            if password == admin.password:
+                # Delete all entries in the model
+                db.session.query(Submission).delete()
+                db.session.commit()
+                return "DELETED" ,200
+            else:
+                return "Unauthorized", 401
+    return "forbidden" ,403
 
-    return "DELETED" ,200
+
+@app.route("/", methods=['get'])
+def home():
+    return jsonify({"status":"Running"}),200
 
 @app.route("/settings", methods=['POST','GET'])
 @require_api_key
@@ -286,6 +357,7 @@ def handel_settings():
             settings_data = Settings.query.filter_by(id=1).first()
             settings_data.limit = new_data["limit"]
             settings_data.mode = new_data["mode"]
+            settings_data.is_reversed = new_data["is_reversed"]
             db.session.commit()
             return "" ,200
 
@@ -293,7 +365,7 @@ def handel_settings():
 
         if len(Settings.query.all()) == 0:
 
-            initial_settings = Settings(limit=50,mode="day")
+            initial_settings = Settings(limit=50,mode="day",is_reversed=True)
             db.session.add(initial_settings)
             db.session.commit()
             return jsonify(initial_settings) , 200
