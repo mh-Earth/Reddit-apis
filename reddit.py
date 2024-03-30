@@ -3,7 +3,7 @@ import praw
 # from dotenv import load_dotenv
 from datetime import datetime
 import time
-from settings import *
+from settings import CLIENT_ID,CLIENT_SECRET,USER_AGENT
 # load_dotenv()
 class Reddit():
 

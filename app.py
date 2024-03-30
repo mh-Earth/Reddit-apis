@@ -112,7 +112,7 @@ def add_cors_headers_to_response(response):
 
 
 
-@app.route("/admin",methods=['POST','GET','DELETE'])
+@app.route("/api/admin",methods=['POST','GET','DELETE'])
 @require_api_key
 def admin():
     if request.method == "GET":
@@ -153,7 +153,7 @@ def admin():
     
 
 # http://localhost:3000/get/meme/hot
-@app.route("/get/<string:sub_reddit>/<string:mode>/<int:limit>")
+@app.route("/api/get/<string:sub_reddit>/<string:mode>/<int:limit>")
 @require_api_key
 def getallsubs(sub_reddit,mode,limit):
 
@@ -180,7 +180,7 @@ def getallsubs(sub_reddit,mode,limit):
         return f"'{sub_reddit}' not found" ,404 ,{"Access-Control-Allow-Origin": "*"}
 
 # http://localhost:3000/save
-@app.route("/save" , methods=['POST'])
+@app.route("/api/save" , methods=['POST'])
 @require_api_key
 def save():
 
@@ -201,7 +201,7 @@ def save():
         res = jsonify(data)
         return res , 404
 
-@app.route("/getall" , methods=['GET'])
+@app.route("/api/getall" , methods=['GET'])
 @require_api_key
 def getall():
 
@@ -217,14 +217,14 @@ def getall():
 
 
 # http://localhost:3000/show
-@app.route("/show")
+@app.route("/api/show")
 def show_all():
     all_submissions = Submission.query.all()
     return jsonify(all_submissions) , 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
 # http://localhost:3000/posted
-@app.route("/posted",methods=['POST','GET','DELETE'])
+@app.route("/api/posted",methods=['POST','GET','DELETE'])
 @require_api_key
 def get_posted_submissions():
     if request.method == 'GET':
@@ -265,7 +265,7 @@ def get_posted_submissions():
         return "No data found", 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
-@app.route("/remove/<string:submission_name>" , methods=['DELETE'])
+@app.route("/api/remove/<string:submission_name>" , methods=['DELETE'])
 @require_api_key
 def delete(submission_name):
     # delete from database
@@ -277,7 +277,7 @@ def delete(submission_name):
     return "" , 200  ,{"Access-Control-Allow-Origin": "*"}
 
 # DELETE ONE OR MANY SUBMISSIONS
-@app.route("/removes", methods=['DELETE'])
+@app.route("/api/removes", methods=['DELETE'])
 @require_api_key
 def deletes():
     if request.is_json:
@@ -302,7 +302,7 @@ def deletes():
     return "DELETED", 200 ,{"Access-Control-Allow-Origin": "*"}
 
 
-@app.route("/check/<string:subreddit>", methods=['GET','POST'])
+@app.route("/api/check/<string:subreddit>", methods=['GET','POST'])
 @require_api_key
 def checkSubreddit(subreddit):
     if request.method == 'GET':
@@ -319,14 +319,14 @@ def checkSubreddit(subreddit):
             password = jsondata['password']
             admin_pass = Admin.query.filter_by(id=1).first().password
             if password == admin_pass:
-                return "Vari" ,200
+                return "Varified" ,200
             else:
                 return "Unauthorized", 401
         else:
             return "Not found" ,404
 
 # delete all submissions
-@app.route("/reset", methods=['DELETE'])
+@app.route("/api/reset", methods=['DELETE'])
 @require_api_key
 def delete_all():
     if request.is_json:
@@ -344,11 +344,11 @@ def delete_all():
     return "forbidden" ,403
 
 
-@app.route("/", methods=['get'])
+@app.route("/api/", methods=['get'])
 def home():
     return jsonify({"status":"Running"}),200
 
-@app.route("/settings", methods=['POST','GET'])
+@app.route("/api/settings", methods=['POST','GET'])
 @require_api_key
 def handel_settings():
     if request.method == 'POST':
