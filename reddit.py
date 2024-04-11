@@ -116,17 +116,8 @@ class Reddit():
 
         return True
 
-    def measure_execution_time(func):
-        def wrapper(*args, **kwargs):
-            start_time = time.perf_counter()
-            result = func(*args, **kwargs)
-            end_time = time.perf_counter()
-            execution_time = end_time - start_time
-            # print(f"Execution time of {func.__name__}: {execution_time} seconds")
-            return result
-        return wrapper
 
-    @measure_execution_time
+    # @measure_execution_time
     def nameToDetails(self,submission_names:list) -> dict:
 
         posts:dict = {
@@ -136,7 +127,7 @@ class Reddit():
 
         submissions_list = list(self.reddit.info(fullnames=submission_names))
         for submission in submissions_list:
-                # if any of the required value dose not exit then skip that submission
+                # if any of the required value dose not exits then skip that submission
                 try:
                     if submission.url != "":
                         url = submission.url
@@ -146,7 +137,7 @@ class Reddit():
                     posts["submission"].append({
                         "name":submission.name, # most required
                         "id":submission.id, # most required
-                        "title":submission.title, # most required
+                        "title_og":submission.title, # most required
                         "author":submission.author.name if submission.author != None else "Not found", #optional
                         "score":submission.score if submission.score != None else "Not found", #optional
                         "created_at":submission.created_utc if submission.created_utc != None else "Not found", #optional
@@ -158,5 +149,14 @@ class Reddit():
                     pass
 
         return posts
+    
+    def submission(self,id:str):
+        '''id:str = Thing without underscore (_)'''
+        return self.reddit.submission(id=id)
+        
 
 
+
+if __name__ == "__main__":
+    r = Reddit()
+    r.submission("1bz04dd")
