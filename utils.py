@@ -2,7 +2,7 @@ import string
 import random
 import time
 
-def gen_password(lenght:int):
+def gen_random_string(lenght:int):
     char_lists = []
     char_lists.extend(string.ascii_letters + string.digits)
     random.shuffle(char_lists)
@@ -20,7 +20,8 @@ def measure_execution_time(func):
     return wrapper
 
 
-if __name__ == "__main__":
-    print(gen_password(16))
+
+# if __name__ == "__main__":
+#     print(gen_password(16))
 
 
