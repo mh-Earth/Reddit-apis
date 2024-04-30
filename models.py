@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from flask_sqlalchemy import SQLAlchemy
 from flask import request,jsonify
 from functools import wraps
-
+import logging
 
 # create the extension
 db = SQLAlchemy() 
@@ -78,15 +78,29 @@ def password_auth(view_func):
             if admin:
                 admin_pass = admin.password
             else:
+                logging.warning('{"Message":"No Admin Found"},200')
                 return jsonify({"Message":"No Admin Found"})
 
             password:str = data['password']
             if password == admin_pass:
                 return view_func(*args, **kwargs)
             else:
+                logging.warning('{"Message":"Invalid password"} ,401')
                 return jsonify({"Message":"Invalid password"}) ,401
         else:
             return view_func(*args, **kwargs)
 
                 
+    return decorated
+# @admin_user_require
+def admin_user_require(view_func):
+    @wraps(view_func)
+    def decorated(*args, **kwargs):
+        admin = Admin.query.filter_by(id=1).first()
+        if admin:
+            return view_func(*args, **kwargs)
+        else:
+            logging.warning('{"Message":"No Admin Found"},404')
+            return jsonify({"Message":"No Admin Found"}),404
+
     return decorated

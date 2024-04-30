@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request,jsonify,make_response
 from settings import API_KEY
-
+import logging
 # Decorator to add CORS headers to each response
 def add_cors_headers(func):
     @wraps(func)
@@ -26,7 +26,8 @@ def require_api_key(view_func):
             api_key = request_data.get('api_key')
 
         if api_key is None or api_key != API_KEY:
-            return jsonify({"Message": "Invalid API Key"}),     
+            logging.warning('{"Message": "Invalid API Key"}')
+            return jsonify({"Message": "Invalid API Key"})
 
 
         return view_func(*args, **kwargs)
@@ -51,10 +52,14 @@ def require_password(view_func):
                     return view_func(*args, **kwargs)
                     
             except KeyError:
+                logging.error('{"Message":"Password required"} ,401')
                 return jsonify({"Message":"Password required"}) ,401
             except ValueError:
+                logging.error('{"Message":"Password cannot be empty"} ,401')
                 return jsonify({"Message":"Password cannot be empty"}) ,401
             except Exception as e:
+                logging.error(e)
+                logging.error('{"Message":"Server Error"} ,500')
                 return jsonify({"Message":"Server Error"}) ,500
         else:
             return view_func(*args, **kwargs)

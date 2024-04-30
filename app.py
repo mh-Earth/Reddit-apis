@@ -1,7 +1,11 @@
 from flask import Flask
-from settings import API_KEY
+from settings import API_KEY,LOGGING_LEVEL
 from routes import bp as routes_bp
 from models import db
+import coloredlogs
+# import logging
+
+coloredlogs.install(level=LOGGING_LEVEL.upper(), fmt='%(asctime)s [%(levelname)s] [%(funcName)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', colors={'DEBUG': 'green', 'INFO': 'blue', 'WARNING': 'yellow', 'ERROR': 'red', 'CRITICAL': 'bold_red'})
 
 
 # create the app
